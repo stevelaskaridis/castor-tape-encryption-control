@@ -4,7 +4,7 @@ created by [Stefanos Laskaridis](steve.laskaridis@cern.ch),
 defined by [Vladimír Bahyl](Vladimir.Bahyl@cern.ch) and [Eric Cano](Eric.Cano@cern.ch)
 
 
-## Input - Script arguments inteface
+## Input - Script arguments interface
 
 The command line arguments of the script should be the following:
 
