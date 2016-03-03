@@ -31,3 +31,23 @@ Encryption off (--disable option):
   * Drive Name
   * Pool Name
   * Message: "Encryption disabled. Cleared encryption parameters from tape."
+
+## Key format specification
+
+The encryption key is defined by the pool that the tape belongs to and is defined in the file:
+**/etc/castor/encryption/keys/tape-encryption-keys.json**
+
+This is a JSON file with the following layout:
+
+```JSON
+{
+    "<pool_name_0>": "encryption_key_0",
+    ...
+    "<pool_name_n>": "encryption_key_n",
+}
+```
+
+### Parsing rules
+
+* In case the pool name is define more than once, the last entry is taken into account.
+* In case the pool name is not defined, then the encryption parameters are cleared from the drive.
