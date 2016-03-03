@@ -10,10 +10,17 @@ As setting encryption on/off is only altering the state of the drive, this scrip
 
 ## Components
 
-* **encryption_script.py**: Scripting frontend that provides the interface towards the outside world.
+* **castor-tape-encryption-control.py**: Scripting frontend that provides the interface towards the outside world.
 * **lib/spout_cmd.{h,c}pp**: C++ backend implementing the SCSI inteface to the device and making the ioctl call.
 
 ## Prerequisites
 
 **IMPORTANT NOTE**: This script is implementing AME (Application Managed Encryption). Before running, you **must** enable the encryption capability for the specified drive from the vendor's inteface.
 
+
+## Related Links
+
+| Title | URL |
+| --- | --- |
+| Jira Ticket | [https://its.cern.ch/jira/browse/CASTOR-5350](https://its.cern.ch/jira/browse/CASTOR-5350) |
+| Twiki page | [https://twiki.cern.ch/twiki/bin/view/DSSGroup/EncryptionProject](https://twiki.cern.ch/twiki/bin/view/DSSGroup/EncryptionProject) |
