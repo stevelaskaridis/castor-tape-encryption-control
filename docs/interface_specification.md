@@ -9,7 +9,7 @@ defined by [Vladimír Bahyl](Vladimir.Bahyl@cern.ch) and [Eric Cano](Eric.Cano@c
 The command line arguments of the script should be the following:
 
 * --vid/-V <VID> - **compulsory**
-* --drivetype/-D <drive_name> - **compulsory**
+* --device/-D  </dev/sgX> - **compulsory**
 * --enable || --disable - **compulsory**
 * --help - **optional**
 
