@@ -26,6 +26,8 @@ import argparse
 import json
 import os
 
+JSON_FILENAME='/etc/castor/encryption/keys/tape-encryption-keys.json'
+BACKEND_BINARY_PATH = '../bin/spout_cmd'
 
 def extract_pool_name(vid):
     """
@@ -80,7 +82,7 @@ def update_key_id_to_tag(key_id, vid):
         return proc.returncode
 
 
-def get_json_hash(filename='/etc/castor/encryption/keys/tape-encryption-keys.json'):
+def get_json_hash(filename=JSON_FILENAME):
     """
     Load JSON hash into memory.
     :param filename: The filename of the json file in the disk.
@@ -109,14 +111,17 @@ def cleanup_and_exit(drive):
     :param drive: The drive whose encryption parameters are to be cleared.
     """
     print "Reverting drive to non-encrypting state."
-    if disable_encryption(drive) == 0:
-        exit(0)
+    res = disable_encryption(drive)
+    if res == 0:
+        exit(-1)
     else:
         print "Disabling encryption failed."
+        if type(res) == str:
+            print res
         exit(1)
 
 
-def disable_encryption(drive):
+def disable_encryption(drive, backend_path=BACKEND_BINARY_PATH):
     """
     Disable the encryption and clear all encryption parameters from the drive.
     Calls C++ backend in order to communicate with the drive via the SCSI interface.
@@ -124,13 +129,18 @@ def disable_encryption(drive):
     :return: The backend's process return code.
     """
     if drive:
-        command = ['../bin/spout_cmd', '-d', drive, '-n']
-        proc = subprocess.Popen(command, close_fds=True)
-        proc.communicate()
-        return proc.returncode
+        command = [backend_path, '-d', drive, '-n']
+        try:
+            proc = subprocess.Popen(command, close_fds=True,
+                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            cmd_out, cmd_err = proc.communicate()
+            return proc.returncode
+        except OSError as e:
+            return "{message}: {filename}".format(message=str(e), filename=os.path.realpath(backend_path))
 
 
-def enable_encryption(key, drive):
+
+def enable_encryption(key, drive, backend_path=BACKEND_BINARY_PATH):
     """
     Enable the encryption and pass encryption parameters to the drive.
     Calls C++ backend in order to communicate with the drive via the SCSI interface.
@@ -139,10 +149,14 @@ def enable_encryption(key, drive):
     :return: The backend's process return code if there is a key, None otherwise.
     """
     if key:
-        command = ['../bin/spout_cmd', '-d', drive, '-k', key]
-        proc = subprocess.Popen(command, close_fds=True)
-        proc.communicate()
-        return proc.returncode
+        command = [backend_path, '-d', drive, '-k', key]
+        try:
+            proc = subprocess.Popen(command, close_fds=True,
+                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            cmd_out, cmd_err = proc.communicate()
+            return proc.returncode
+        except OSError as e:
+            return "{message}: {filename}".format(message=str(e), filename=os.path.realpath(backend_path))
     else:
         return None
 
@@ -180,22 +194,27 @@ if __name__ == '__main__':
         key_id = extract_key_id_from_tag(args.vid)
         if type(key_id) == int:
             print "Could not acquire the key id of the tape."
-            exit(-1)
+            cleanup_and_exit(args.drive)
 
         # Get json hash
         json_hash = get_json_hash()
         if not json_hash:
-            exit(-1)
+            cleanup_and_exit(args.drive)
 
         if key_id:
             # Search for the key_id in the JSON file
-            key = json_hash[key_id]
+            try:
+                key = json_hash[key_id]
+            except KeyError:
+                print "Could not find the key with key_id={key_id} " \
+                      "in {filename}.".format(key_id=key_id, filename=JSON_FILENAME)
+                cleanup_and_exit(args.drive)
         else:
             # Get pool of the tape
             pool_name = extract_pool_name(args.vid)
             if type(pool_name) == int:
                 print "Could not determine the pool to which this VID belongs."
-                exit(-1)
+                cleanup_and_exit(args.drive)
             # Search for the latest pool key in the JSON file
             pool_keys_list = sorted(filter(lambda x: x.startswith(pool_name), json_hash.keys()))
             if pool_keys_list:
@@ -216,13 +235,18 @@ if __name__ == '__main__':
             exit(0)
         else:
             print 'Enabling encryption failed.'
+            if type(res) == str:
+                print res
             cleanup_and_exit(args.drive)
 
     # Disable encryption
     if args.disable:
-        if disable_encryption(args.drive) == 0:
+        res = disable_encryption(args.drive)
+        if res == 0:
             print 'Encryption disabled. Cleared encryption parameters from tape.'
             exit(0)
         else:
             print 'Disabling encryption failed.'
+            if type(res) == str:
+                print res
             exit(1)
