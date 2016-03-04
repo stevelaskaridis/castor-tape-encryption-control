@@ -68,7 +68,7 @@ def update_key_id_to_tag(key_id, vid):
     Function updating the key_id to the tag of a specific vid to the VMGR database .
     :param key_id: The key_id whose value will be copied to the tag field.
     :param vid: The VID of the tape whose tag will be updated.
-    :return:
+    :return: The key_id read from the tag or the return code of the `vmgr` command if failed.
     """
     if key_id:
         command = ['vmgrsettag', '--tag', key_id, '-V', vid]
@@ -127,6 +127,7 @@ def disable_encryption(drive, backend_path=BACKEND_BINARY_PATH):
     Calls C++ backend in order to communicate with the drive via the SCSI interface.
     :param drive: The drive whose encryption parameters are to be cleared.
     :return: The backend's process return code.
+    In case the SCSI backend binary cannot be read, it will return the error message as a string.
     """
     if drive:
         command = [backend_path, '-d', drive, '-n']
@@ -147,6 +148,7 @@ def enable_encryption(key, drive, backend_path=BACKEND_BINARY_PATH):
     :param key: The key with which the drive will be encrypting/decrypting data.
     :param drive: The drive whose encryption parameters are to be cleared.
     :return: The backend's process return code if there is a key, None otherwise.
+    In case the SCSI backend binary cannot be read, it will return the error message as a string.
     """
     if key:
         command = [backend_path, '-d', drive, '-k', key]
@@ -243,7 +245,7 @@ if __name__ == '__main__':
     if args.disable:
         res = disable_encryption(args.drive)
         if res == 0:
-            print 'Encryption disabled. Cleared encryption parameters from tape.'
+            print 'Encryption disabled. Cleared encryption parameters from drive.'
             exit(0)
         else:
             print 'Disabling encryption failed.'
