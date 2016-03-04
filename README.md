@@ -11,7 +11,11 @@ As setting encryption on/off is only altering the state of the drive, this scrip
 ## Components
 
 * **castor-tape-encryption-control.py**: Scripting frontend that provides the interface towards the outside world.
-* **lib/spout_cmd.{h,c}pp**: C++ backend implementing the SCSI interface to the device and making the ioctl call.
+* **lib/{spout_cmd.cpp,include/spout_cmd.hpp}**: C++ backend implementing the SCSI encryption interface to the device.
+* **lib/{scsi_lli.cpp,include/scsi_lli.hpp}**: C++ backend implementing underlying SCSI communication with the device and making the ioctl calls.
+* **lib/include/scsi_constants.hpp**: Constants used throughout the C++ backend.
+* **lib/main.cpp**: C++ backend entry point of execution.
+* **bin/spout_cmd.cpp**: Executable created from C++ backend. Called by the python script.
 
 ## Prerequisites
 
