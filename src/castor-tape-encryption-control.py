@@ -33,16 +33,74 @@ def extract_pool_name(vid):
     It's results are based on the output of `vmgrlisttape` tool.
     :param vid: The VID of the tape whose pool we are searching for.
     :return: The pool name of the given VID or the return code of the `vmgrlisttape`
-    command if != 0.
+    command if != 0. Otherwise the return value of the command.
     """
     command = ['vmgrlisttape', '-V', vid]
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     pool_cmd_out, pool_cmd_err = proc.communicate()
     if proc.returncode == 0:
-        return pool_cmd_out.split()[5]
+        return pool_cmd_out.split()[5].strip()
     else:
         return proc.returncode
 
+def extract_key_id_from_tag(vid):
+    """
+    Function extracting the key_id from the tag of the given VID from the VMGR database.
+    :param vid: The VID of the tape whose tag is to be returned.
+    :return: The key_id that is stored in the tag column of the VMGR database if command !=0.
+    Otherwise the return value of the command.
+    """
+    command = ['vmgrgettag', '-V', vid]
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    cmd_out, cmd_err = proc.communicate()
+    if proc.returncode == 0:
+        return str(cmd_out).strip()
+    # If tag is empty, return empty string
+    elif cmd_err.strip() == "{vid}: No such file or directory".format(vid=vid):
+        return ""
+    else:
+        return proc.returncode
+
+def update_key_id_to_tag(key_id, vid):
+    """
+    Function updating the key_id to the tag of a specific vid to the VMGR database .
+    :param key_id: The key_id whose value will be copied to the tag field.
+    :param vid: The VID of the tape whose tag will be updated.
+    :return:
+    """
+    if key_id:
+        command = ['vmgrsettag', '--tag', key_id, '-V', vid]
+    else:
+        command = ['vmgrdeltag', '-V', vid]
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    cmd_out, cmd_err = proc.communicate()
+    if proc.returncode == 0:
+        return str(cmd_out)
+    else:
+        return proc.returncode
+
+
+def get_json_hash(filename='/etc/castor/encryption/keys/tape-encryption-keys.json'):
+    """
+    Load JSON hash into memory.
+    :param filename: The filename of the json file in the disk.
+    :return: The JSON hash loaded, else None.
+    """
+    json_hash = None
+    if os.path.exists(filename):
+        with open(filename) as f:
+            try:
+                json_hash = json.load(f)
+            except ValueError:
+                print ' '.join([filename, 'is not a valid JSON file.'])
+            except KeyError:
+                print ' '.join(['Pool name', pool_name,
+                                'is not available in the JSON key store.'])
+            except:
+                print ' '.join(['Unknown error while reading the file', filename])
+    else:
+        print ' '.join(['File', filename, 'does not exist.'])
+    return json_hash
 
 def cleanup_and_exit(drive):
     """
@@ -52,10 +110,10 @@ def cleanup_and_exit(drive):
     """
     print "Reverting drive to non-encrypting state."
     if disable_encryption(drive) == 0:
-        exit(-1)
+        exit(0)
     else:
         print "Disabling encryption failed."
-        exit(-1)
+        exit(1)
 
 
 def disable_encryption(drive):
@@ -78,12 +136,15 @@ def enable_encryption(key, drive):
     Calls C++ backend in order to communicate with the drive via the SCSI interface.
     :param key: The key with which the drive will be encrypting/decrypting data.
     :param drive: The drive whose encryption parameters are to be cleared.
-    :return: The backend's process return code.
+    :return: The backend's process return code if there is a key, None otherwise.
     """
     if key:
         command = ['../bin/spout_cmd', '-d', drive, '-k', key]
         proc = subprocess.Popen(command, close_fds=True)
         proc.communicate()
+        return proc.returncode
+    else:
+        return None
 
 
 # Entry point of execution.
@@ -113,38 +174,46 @@ if __name__ == '__main__':
 
     # Enable encryption
     if args.enable:
-        print "Turning encryption on in drive."
+        key = None
 
-        # Get pool of the tape
-        pool_name = extract_pool_name(args.vid)
-        if type(pool_name) == int:
-            print "Could not determine the pool to which this VID belongs."gi
+        # Get tag value for the tape
+        key_id = extract_key_id_from_tag(args.vid)
+        if type(key_id) == int:
+            print "Could not acquire the key id of the tape."
             exit(-1)
 
-        # Get encryption key from file
-        key = ""
-        key_filename = '/etc/castor/encryption/keys/tape-encryption-keys.json'
-        if os.path.exists(key_filename):
-            with open(key_filename) as f:
-                try:
-                    key = json.load(f)[pool_name]
-                except ValueError:
-                    print ' '.join([key_filename, 'is not a valid JSON file.'])
-                    exit(-1)
-                except KeyError:
-                    print ' '.join(['Pool name', pool_name,
-                                    'is not available in the JSON key store.'])
-                    exit(-1)
-                except:
-                    print ' '.join(['Unknown error while reading the file', key_filename])
-                    exit(-1)
+        # Get json hash
+        json_hash = get_json_hash()
+        if not json_hash:
+            exit(-1)
+
+        if key_id:
+            # Search for the key_id in the JSON file
+            key = json_hash[key_id]
         else:
-            print ' '.join(['File', key_filename, 'does not exist.'])
-            exit(-1)
+            # Get pool of the tape
+            pool_name = extract_pool_name(args.vid)
+            if type(pool_name) == int:
+                print "Could not determine the pool to which this VID belongs."
+                exit(-1)
+            # Search for the latest pool key in the JSON file
+            pool_keys_list = sorted(filter(lambda x: x.startswith(pool_name), json_hash.keys()))
+            if pool_keys_list:
+                key_id = pool_keys_list[-1]
+                key = json_hash[key_id]
+                # update the key_id to the volume's tag
+                update_key_id_to_tag(key_id, args.vid)
+            else:
+                pass # do not encrypt
 
-        if enable_encryption(key, args.drive) == 0:
+        res = enable_encryption(key, args.drive)
+        if res == 0:
             print 'Encryption enabled. ' \
-                  'Using key from file {filename}.'.format(filename=key_filename)
+                  'Using key with id={id}.'.format(id=key_id)
+            exit(0)
+        elif res is None:
+            print 'Encryption not enabled.'
+            exit(0)
         else:
             print 'Enabling encryption failed.'
             cleanup_and_exit(args.drive)
@@ -153,5 +222,7 @@ if __name__ == '__main__':
     if args.disable:
         if disable_encryption(args.drive) == 0:
             print 'Encryption disabled. Cleared encryption parameters from tape.'
+            exit(0)
         else:
             print 'Disabling encryption failed.'
+            exit(1)
