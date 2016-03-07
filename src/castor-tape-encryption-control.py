@@ -12,7 +12,7 @@
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#  GNU Affero General Public License for more details.
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
@@ -42,7 +42,10 @@ def extract_pool_name(vid):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     pool_cmd_out, pool_cmd_err = proc.communicate()
     if proc.returncode == 0:
-        return pool_cmd_out.split()[5].strip()
+        if pool_cmd_err.strip() != 'vmgrlisttape: No such tape':
+            return pool_cmd_out.split()[5].strip()
+        else:
+            return 1
     else:
         return proc.returncode
 
@@ -99,9 +102,6 @@ def get_json_hash(filename=JSON_FILENAME):
                 json_hash = json.load(f)
             except ValueError:
                 error_msg = ' '.join([filename, 'is not a valid JSON file.'])
-            except KeyError:
-                error_msg = ' '.join(['Pool name', pool_name,
-                                     'is not available in the JSON key store.'])
             except:
                 error_msg = ' '.join(['Unknown error while reading the file', filename])
     else:
@@ -130,6 +130,11 @@ def cleanup_and_exit(drive, msg=None):
 
 
 def _exit_with_message(return_code, message=''):
+    """
+    Print relevant information to stdout and exit with the return code.
+    :param return_code: Embedded in JSON output and exited with.
+    :param message: The message payload of the JSON output.
+    """
     code_error_hash = {
         -1: 'ERROR_ENC_CLEARED',
         0: 'SUCCESS',
@@ -247,7 +252,7 @@ if __name__ == '__main__':
             # Get pool of the tape
             pool_name = extract_pool_name(args.vid)
             if type(pool_name) == int:
-                msg.append("Could not determine the pool to which this VID belongs.")
+                msg.append("Could not determine the pool {vid} belongs to.".format(vid=args.vid))
                 cleanup_and_exit(args.drive, msg=msg)
             # Search for the latest pool key in the JSON file
             pool_keys_list = sorted(filter(lambda x: x.startswith(pool_name), json_hash.keys()))
@@ -255,7 +260,11 @@ if __name__ == '__main__':
                 key_id = pool_keys_list[-1]
                 key = json_hash[key_id]
                 # update the key_id to the volume's tag
-                update_key_id_to_tag(key_id, args.vid)
+                if type(update_key_id_to_tag(key_id, args.vid)) == str:
+                    msg.append("Updated key_id in {vid}'s tag".format(vid=args.vid))
+                else:
+                    msg.append("Could not update key in {vid}'s tag".format(vid=args.vid))
+                    cleanup_and_exit(args.drive, msg)
             else:
                 pass  # do not encrypt
 
