@@ -15,12 +15,11 @@ As setting encryption on/off is only altering the state of the drive, this scrip
 * **lib/{scsi_lli.cpp,include/scsi_lli.hpp}**: C++ backend implementing underlying SCSI communication with the device and making the ioctl calls.
 * **lib/include/scsi_constants.hpp**: Constants used throughout the C++ backend.
 * **lib/main.cpp**: C++ backend entry point of execution.
-* **bin/spout_cmd.cpp**: Executable created from C++ backend. Called by the python script.
+* **bin/spout_cmd.cpp**: Executable created from C++ backend. Called by the python script. Expected to be found after compilation.
 
 ## Prerequisites
 
 **IMPORTANT NOTE**: This script is implementing AME (Application Managed Encryption). Before running, you **must** enable the encryption capability for the specified drive from the vendor's interface.
-
 
 ## Related Links
 
