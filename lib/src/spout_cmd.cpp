@@ -29,6 +29,7 @@
   ****************************************************************************/
 
 #include <cstring>
+#include <arpa/inet.h>
 #include <iostream>
 #include "scsi_lli.hpp"
 #include "spout_cmd.hpp"
@@ -38,8 +39,7 @@
  */
 static inline void set_2_byte_value(unsigned char *field, int value)
 {
-   field[0] = (unsigned char)((value & 0xff00) >> 8);
-   field[1] = (unsigned char)(value & 0x00ff);
+    *((uint16_t *) field) = htons(value);
 }
 
 /*
@@ -47,10 +47,7 @@ static inline void set_2_byte_value(unsigned char *field, int value)
  */
 static inline void set_4_byte_value(unsigned char *field, int value)
 {
-   field[0] = (unsigned char)((value & 0xff000000) >> 24);
-   field[1] = (unsigned char)((value & 0x00ff0000) >> 16);
-   field[2] = (unsigned char)((value & 0x0000ff00) >> 8);
-   field[3] = (unsigned char)(value & 0x000000ff);
+   *((uint32_t *) field) = htonl(value);
 }
 
 /*

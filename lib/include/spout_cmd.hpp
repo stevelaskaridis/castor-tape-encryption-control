@@ -212,17 +212,6 @@ enum {
 typedef struct {
    uint8_t pageCode[2];                        /* Page Code, 2 bytes MSB/LSB */
    uint8_t length[2];                          /* Page Length, 2 bytes MSB/LSB */
-#if HAVE_BIG_ENDIAN
-   uint8_t nexusScope:3;                       /* Scope, See SPP_NEXUS_SC_* */
-   uint8_t res_bits_1:4;                       /* Reserved, 4 bits */
-   uint8_t lock:1;                             /* Lock bit */
-   uint8_t CEEM:2;                             /* Check External Encryption Mode, See SPP_CEEM_* */
-   uint8_t RDMC:2;                             /* Raw Decryption Mode Control, See SPP_RDMC_* */
-   uint8_t SDK:1;                              /* Supplemental Decryption Key */
-   uint8_t CKOD:1;                             /* Clear Key On Demount */
-   uint8_t CKORP:1;                            /* Clear Key On Reservation Preempt */
-   uint8_t CKORL:1;                            /* Clear Key On Reservation Lost */
-#else
    uint8_t lock:1;                             /* Lock bit */
    uint8_t res_bits_1:4;                       /* Reserved, 4 bits */
    uint8_t nexusScope:3;                       /* Scope, See SPP_NEXUS_SC_* */
@@ -232,7 +221,6 @@ typedef struct {
    uint8_t SDK:1;                              /* Supplemental Decryption Key */
    uint8_t RDMC:2;                             /* Raw Decryption Mode Control, See SPP_RDMC_* */
    uint8_t CEEM:2;                             /* Check External Encryption Mode, See SPP_CEEM_* */
-#endif
    uint8_t encryptionMode;                     /* Encryption Mode, See SPP_ENCR_MODE_* */
    uint8_t decryptionMode;                     /* Decryption Mode, See SPP_DECR_MODE_* */
    uint8_t algorithmIndex;                     /* Algorithm Index */
@@ -261,32 +249,18 @@ enum {
 typedef struct {
    uint8_t pageCode[2];                        /* Page Code, 2 bytes MSB/LSB */
    uint8_t length[2];                          /* Page Length, 2 bytes MSB/LSB */
-#if HAVE_BIG_ENDIAN
-   uint8_t nexusScope:3;                       /* Scope, See SPP_NEXUS_SC_* */
-   uint8_t res_bits_1:2;                       /* Reserved, 2 bits */
-   uint8_t keyScope:3;                         /* Logical Block Encryption Scope */
-#else
    uint8_t keyScope:3;                         /* Logical Block Encryption Scope */
    uint8_t res_bits_1:2;                       /* Reserved, 2 bits */
    uint8_t nexusScope:3;                       /* Scope, See SPP_NEXUS_SC_* */
-#endif
    uint8_t encryptionMode;                     /* Encryption Mode, See SPP_ENCR_MODE_* */
    uint8_t decryptionMode;                     /* Decryption Mode, See SPP_DECR_MODE_* */
    uint8_t algorithmIndex;                     /* Algorithm Index */
    uint8_t keyInstance[4];                     /* Key Instance Counter MSB/LSB */
-#if HAVE_BIG_ENDIAN
-   uint8_t res_bits_2:1;                       /* Reserved, 1 bit */
-   uint8_t parametersControl:3;                /* Logical Block encryption parameters, See SPP_PARM_LOG_BLOCK_* */
-   uint8_t VCELB:1;                            /* Volume Contains Encrypted Logical Blocks */
-   uint8_t CEEMS:2;                            /* Check External Encryption Mode Status, See SPP_CEEM_* */
-   uint8_t RDMD:1;                             /* Raw Decryption Mode Disabled */
-#else
    uint8_t RDMD:1;                             /* Raw Decryption Mode Disabled */
    uint8_t CEEMS:2;                            /* Check External Encryption Mode Status, See SPP_CEEM_* */
    uint8_t VCELB:1;                            /* Volume Contains Encrypted Logical Blocks */
    uint8_t parametersControl:3;                /* Logical Block encryption parameters, See SPP_PARM_LOG_BLOCK_* */
    uint8_t res_bits_2:1;                       /* Reserved, 1 bit */
-#endif
    uint8_t kadFormat;                          /* KAD Format, See SPP_KAD_KEY_FORMAT_* */
    uint8_t ASDKCount[2];                       /* Available Supplemental Decryption Key MSB/LSB */
    uint8_t res_bits_4[8];                      /* Reserved, 8 bytes */
@@ -347,23 +321,12 @@ typedef struct {
    uint8_t pageCode[2];                        /* Page Code, 2 bytes MSB/LSB */
    uint8_t length[2];                          /* Page Length, 2 bytes MSB/LSB */
    uint8_t log_obj_num[8];                     /* Logical Object Number */
-#if HAVE_BIG_ENDIAN
-   uint8_t compressionStatus:4;                /* Compression Status, See SPP_COMPRESS_STATUS_* */
-   uint8_t encryptionStatus:4;                 /* Encryption Status, See SPP_ENCR_STATUS_* */
-#else
    uint8_t encryptionStatus:4;                 /* Encryption Status, See SPP_ENCR_STATUS_* */
    uint8_t compressionStatus:4;                /* Compression Status, See SPP_COMPRESS_STATUS_* */
-#endif
    uint8_t algorithmIndex;                     /* Algorithm Index */
-#if HAVE_BIG_ENDIAN
-   uint8_t res_bits_1:6;                       /* Reserved, 6 bits */
-   uint8_t EMES:1;                             /* Encryption Mode External Status */
-   uint8_t RDMDS:1;                            /* Raw Decryption Mode Disabled Status */
-#else
    uint8_t RDMDS:1;                            /* Raw Decryption Mode Disabled Status */
    uint8_t EMES:1;                             /* Encryption Mode External Status */
    uint8_t res_bits_1:6;                       /* Reserved, 6 bits */
-#endif
    uint8_t nextBlockKADFormat;                 /* Next Block KAD Format, See SPP_KAD_KEY_FORMAT_* */
 } SPP_PAGE_NBES;
 
@@ -372,13 +335,8 @@ typedef struct {
  */
 typedef struct {
    uint8_t type;                               /* Key Descriptor Type, See SPP_KAD_KEY_DESC_* */
-#if HAVE_BIG_ENDIAN
-   uint8_t res_bits_1:5;                       /* Reserved, 5 bits */
-   uint8_t authenticated:3;
-#else
    uint8_t authenticated:3;
    uint8_t res_bits_1:5;                       /* Reserved, 5 bits */
-#endif
    uint8_t descriptorLength[2];                /* Key Descriptor Length MSB/LSB */
    uint8_t descriptor[SPP_DESCRIPTOR_LENGTH];
 } SPP_KAD;
