@@ -30,15 +30,17 @@ DESCRIPTION
     # ****************************************************************************/
 
 FUNCTIONS
-    cleanup_and_exit(drive)
+    cleanup_and_exit(drive, msg=None)
         Function clearing the encryption parameters from the drive. Exits the program with code -1
         after completion.
         :param drive: The drive whose encryption parameters are to be cleared.
+        :param msg: Array of strings to be printed on exit.
     
     disable_encryption(drive, backend_path='../bin/spout_cmd')
         Disable the encryption and clear all encryption parameters from the drive.
         Calls C++ backend in order to communicate with the drive via the SCSI interface.
         :param drive: The drive whose encryption parameters are to be cleared.
+        :param backend_path: String of the path where the backend binary is located.
         :return: The backend's process return code.
         In case the SCSI backend binary cannot be read, it will return the error message as a string.
     
@@ -47,6 +49,7 @@ FUNCTIONS
         Calls C++ backend in order to communicate with the drive via the SCSI interface.
         :param key: The key with which the drive will be encrypting/decrypting data.
         :param drive: The drive whose encryption parameters are to be cleared.
+        :param backend_path: String of the path where the backend binary is located.
         :return: The backend's process return code if there is a key, None otherwise.
         In case the SCSI backend binary cannot be read, it will return the error message as a string.
     
@@ -63,10 +66,10 @@ FUNCTIONS
         :return: The pool name of the given VID or the return code of the `vmgrlisttape`
         command if != 0. Otherwise the return value of the command.
     
-    get_json_hash(filename='/etc/castor/encryption/keys/tape-encryption-keys.json')
+    get_json_hash(filename='/etc/castor/encryption/tape-encryption-keys.json')
         Load JSON hash into memory.
         :param filename: The filename of the json file in the disk.
-        :return: The JSON hash loaded, else None.
+        :return: The JSON hash loaded, else a tuple of an empty None and the error message.
     
     update_key_id_to_tag(key_id, vid)
         Function updating the key_id to the tag of a specific vid to the VMGR database .
@@ -76,6 +79,6 @@ FUNCTIONS
 
 DATA
     BACKEND_BINARY_PATH = '../bin/spout_cmd'
-    JSON_FILENAME = '/etc/castor/encryption/keys/tape-encryption-keys.json...
+    JSON_FILENAME = '/etc/castor/encryption/tape-encryption-keys.json'
 
 

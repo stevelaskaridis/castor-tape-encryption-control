@@ -48,18 +48,21 @@
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-cleanup_and_exit"><strong>cleanup_and_exit</strong></a>(drive)</dt><dd><tt>Function&nbsp;clearing&nbsp;the&nbsp;encryption&nbsp;parameters&nbsp;from&nbsp;the&nbsp;drive.&nbsp;Exits&nbsp;the&nbsp;program&nbsp;with&nbsp;code&nbsp;-1<br>
+<td width="100%"><dl><dt><a name="-cleanup_and_exit"><strong>cleanup_and_exit</strong></a>(drive, msg<font color="#909090">=None</font>)</dt><dd><tt>Function&nbsp;clearing&nbsp;the&nbsp;encryption&nbsp;parameters&nbsp;from&nbsp;the&nbsp;drive.&nbsp;Exits&nbsp;the&nbsp;program&nbsp;with&nbsp;code&nbsp;-1<br>
 after&nbsp;completion.<br>
-:param&nbsp;drive:&nbsp;The&nbsp;drive&nbsp;whose&nbsp;encryption&nbsp;parameters&nbsp;are&nbsp;to&nbsp;be&nbsp;cleared.</tt></dd></dl>
+:param&nbsp;drive:&nbsp;The&nbsp;drive&nbsp;whose&nbsp;encryption&nbsp;parameters&nbsp;are&nbsp;to&nbsp;be&nbsp;cleared.<br>
+:param&nbsp;msg:&nbsp;Array&nbsp;of&nbsp;strings&nbsp;to&nbsp;be&nbsp;printed&nbsp;on&nbsp;exit.</tt></dd></dl>
  <dl><dt><a name="-disable_encryption"><strong>disable_encryption</strong></a>(drive, backend_path<font color="#909090">='../bin/spout_cmd'</font>)</dt><dd><tt>Disable&nbsp;the&nbsp;encryption&nbsp;and&nbsp;clear&nbsp;all&nbsp;encryption&nbsp;parameters&nbsp;from&nbsp;the&nbsp;drive.<br>
 Calls&nbsp;C++&nbsp;backend&nbsp;in&nbsp;order&nbsp;to&nbsp;communicate&nbsp;with&nbsp;the&nbsp;drive&nbsp;via&nbsp;the&nbsp;SCSI&nbsp;interface.<br>
 :param&nbsp;drive:&nbsp;The&nbsp;drive&nbsp;whose&nbsp;encryption&nbsp;parameters&nbsp;are&nbsp;to&nbsp;be&nbsp;cleared.<br>
+:param&nbsp;backend_path:&nbsp;String&nbsp;of&nbsp;the&nbsp;path&nbsp;where&nbsp;the&nbsp;backend&nbsp;binary&nbsp;is&nbsp;located.<br>
 :return:&nbsp;The&nbsp;backend's&nbsp;process&nbsp;return&nbsp;code.<br>
 In&nbsp;case&nbsp;the&nbsp;SCSI&nbsp;backend&nbsp;binary&nbsp;cannot&nbsp;be&nbsp;read,&nbsp;it&nbsp;will&nbsp;return&nbsp;the&nbsp;error&nbsp;message&nbsp;as&nbsp;a&nbsp;string.</tt></dd></dl>
  <dl><dt><a name="-enable_encryption"><strong>enable_encryption</strong></a>(key, drive, backend_path<font color="#909090">='../bin/spout_cmd'</font>)</dt><dd><tt>Enable&nbsp;the&nbsp;encryption&nbsp;and&nbsp;pass&nbsp;encryption&nbsp;parameters&nbsp;to&nbsp;the&nbsp;drive.<br>
 Calls&nbsp;C++&nbsp;backend&nbsp;in&nbsp;order&nbsp;to&nbsp;communicate&nbsp;with&nbsp;the&nbsp;drive&nbsp;via&nbsp;the&nbsp;SCSI&nbsp;interface.<br>
 :param&nbsp;key:&nbsp;The&nbsp;key&nbsp;with&nbsp;which&nbsp;the&nbsp;drive&nbsp;will&nbsp;be&nbsp;encrypting/decrypting&nbsp;data.<br>
 :param&nbsp;drive:&nbsp;The&nbsp;drive&nbsp;whose&nbsp;encryption&nbsp;parameters&nbsp;are&nbsp;to&nbsp;be&nbsp;cleared.<br>
+:param&nbsp;backend_path:&nbsp;String&nbsp;of&nbsp;the&nbsp;path&nbsp;where&nbsp;the&nbsp;backend&nbsp;binary&nbsp;is&nbsp;located.<br>
 :return:&nbsp;The&nbsp;backend's&nbsp;process&nbsp;return&nbsp;code&nbsp;if&nbsp;there&nbsp;is&nbsp;a&nbsp;key,&nbsp;None&nbsp;otherwise.<br>
 In&nbsp;case&nbsp;the&nbsp;SCSI&nbsp;backend&nbsp;binary&nbsp;cannot&nbsp;be&nbsp;read,&nbsp;it&nbsp;will&nbsp;return&nbsp;the&nbsp;error&nbsp;message&nbsp;as&nbsp;a&nbsp;string.</tt></dd></dl>
  <dl><dt><a name="-extract_key_id_from_tag"><strong>extract_key_id_from_tag</strong></a>(vid)</dt><dd><tt>Function&nbsp;extracting&nbsp;the&nbsp;key_id&nbsp;from&nbsp;the&nbsp;tag&nbsp;of&nbsp;the&nbsp;given&nbsp;VID&nbsp;from&nbsp;the&nbsp;VMGR&nbsp;database.<br>
@@ -71,9 +74,9 @@ It's&nbsp;results&nbsp;are&nbsp;based&nbsp;on&nbsp;the&nbsp;output&nbsp;of&nbsp;
 :param&nbsp;vid:&nbsp;The&nbsp;VID&nbsp;of&nbsp;the&nbsp;tape&nbsp;whose&nbsp;pool&nbsp;we&nbsp;are&nbsp;searching&nbsp;for.<br>
 :return:&nbsp;The&nbsp;pool&nbsp;name&nbsp;of&nbsp;the&nbsp;given&nbsp;VID&nbsp;or&nbsp;the&nbsp;return&nbsp;code&nbsp;of&nbsp;the&nbsp;`vmgrlisttape`<br>
 command&nbsp;if&nbsp;!=&nbsp;0.&nbsp;Otherwise&nbsp;the&nbsp;return&nbsp;value&nbsp;of&nbsp;the&nbsp;command.</tt></dd></dl>
- <dl><dt><a name="-get_json_hash"><strong>get_json_hash</strong></a>(filename<font color="#909090">='/etc/castor/encryption/keys/tape-encryption-keys.json'</font>)</dt><dd><tt>Load&nbsp;JSON&nbsp;hash&nbsp;into&nbsp;memory.<br>
+ <dl><dt><a name="-get_json_hash"><strong>get_json_hash</strong></a>(filename<font color="#909090">='/etc/castor/encryption/tape-encryption-keys.json'</font>)</dt><dd><tt>Load&nbsp;JSON&nbsp;hash&nbsp;into&nbsp;memory.<br>
 :param&nbsp;filename:&nbsp;The&nbsp;filename&nbsp;of&nbsp;the&nbsp;json&nbsp;file&nbsp;in&nbsp;the&nbsp;disk.<br>
-:return:&nbsp;The&nbsp;JSON&nbsp;hash&nbsp;loaded,&nbsp;else&nbsp;None.</tt></dd></dl>
+:return:&nbsp;The&nbsp;JSON&nbsp;hash&nbsp;loaded,&nbsp;else&nbsp;a&nbsp;tuple&nbsp;of&nbsp;an&nbsp;empty&nbsp;None&nbsp;and&nbsp;the&nbsp;error&nbsp;message.</tt></dd></dl>
  <dl><dt><a name="-update_key_id_to_tag"><strong>update_key_id_to_tag</strong></a>(key_id, vid)</dt><dd><tt>Function&nbsp;updating&nbsp;the&nbsp;key_id&nbsp;to&nbsp;the&nbsp;tag&nbsp;of&nbsp;a&nbsp;specific&nbsp;vid&nbsp;to&nbsp;the&nbsp;VMGR&nbsp;database&nbsp;.<br>
 :param&nbsp;key_id:&nbsp;The&nbsp;key_id&nbsp;whose&nbsp;value&nbsp;will&nbsp;be&nbsp;copied&nbsp;to&nbsp;the&nbsp;tag&nbsp;field.<br>
 :param&nbsp;vid:&nbsp;The&nbsp;VID&nbsp;of&nbsp;the&nbsp;tape&nbsp;whose&nbsp;tag&nbsp;will&nbsp;be&nbsp;updated.<br>
@@ -86,5 +89,5 @@ command&nbsp;if&nbsp;!=&nbsp;0.&nbsp;Otherwise&nbsp;the&nbsp;return&nbsp;value&n
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>BACKEND_BINARY_PATH</strong> = '../bin/spout_cmd'<br>
-<strong>JSON_FILENAME</strong> = '/etc/castor/encryption/keys/tape-encryption-keys.json'</td></tr></table>
+<strong>JSON_FILENAME</strong> = '/etc/castor/encryption/tape-encryption-keys.json'</td></tr></table>
 </body></html>
